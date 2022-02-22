@@ -1,5 +1,5 @@
-OBJS	= main.o
-SOURCE	= main.c
+OBJS	= main.o process.o
+SOURCE	= main.c process.c
 HEADER	= 
 OUT		= scheduling-sim
 CC	 	= gcc
