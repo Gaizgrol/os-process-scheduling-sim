@@ -10,9 +10,10 @@ typedef enum State
 typedef struct Process
 {
     uint32_t pid;
+    uint8_t priority;
+    State state;
     char* name;
-    State priority;
 } Process;
 
 void delete_process();
-Process* new_process( uint32_t pid, State priority, char* name );
+Process* new_process( uint32_t pid, uint8_t priority, char* name );
