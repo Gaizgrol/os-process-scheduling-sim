@@ -1,2 +1,3 @@
-*.o
-scheduling-sim
+.vscode
+build
+scheduling_sim
