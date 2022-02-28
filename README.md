@@ -36,9 +36,9 @@ a estratégia de seleção *Round Robin (ou Circular)* com *Feedback*.
 ### A partir do código fonte:
 
 - Garanta que todas as [dependências](#dependencias) estão satisfeitas.
-- Execute `make all` para compilar, conectar e criar o executável.
-- Execute `make clean` para remover os arquivos objetos gerados.
-- Execute `./scheduling-sim`.
+- Execute `make` para compilar, conectar e criar o executável.
+- Execute `./scheduling_sim` para rodar o projeto.
+- Execute `make clean` para remover os binários gerados caso queira realizar uma outra compilação.
 
 
 ## :busts_in_silhouette: Contribuindo com o projeto
