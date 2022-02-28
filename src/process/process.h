@@ -2,17 +2,12 @@
 #define PROCESS_H
 
 #include <stdint.h>
-
-typedef enum State
-{
-    READY, RUNNING, IO
-} State;
-
-const char* get_state_str( State s );
+#include "state.h"
 
 typedef struct Process
 {
     uint32_t pid;
+    uint32_t cpu_burst_time;
     uint8_t priority;
     State state;
     const char* name;
