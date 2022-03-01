@@ -3,7 +3,8 @@
 
 #include "process.h"
 
-// Estrutura usada internamente nas filas de prioridade de processos
+// Estrutura usada internamente nas filas de processos como uma lista
+// duplamente conectada
 typedef struct Proc_Node
 {
     struct Proc_Node* prev;
