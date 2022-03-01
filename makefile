@@ -31,7 +31,7 @@ $(TARGET_EXEC): $(OBJS)
 # Build step for C source
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -g -c $< -o $@
 
 .PHONY: clean
 clean:
