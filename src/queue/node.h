@@ -12,6 +12,12 @@ typedef struct Proc_Node
     struct Proc_Node* next;
 } Proc_Node;
 
-Proc_Node new_node( Process* proc );
+// Construtor
+Proc_Node* new_node( Process* proc );
+// Destrutor
+void delete_node( Proc_Node** node );
+
+// Mostra informações do nome do processo e seus vizinhos
+void print_node( Proc_Node* node );
 
 #endif

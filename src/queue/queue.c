@@ -1,56 +1,89 @@
-#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "node.h"
 #include "queue.h"
 
-Proc_Queue new_queue()
+Proc_Queue* new_queue()
 {
-    return (Proc_Queue) {
+    Proc_Queue* queue = malloc( sizeof( Proc_Queue ) );
+    
+    *queue = (Proc_Queue) {
         .front = NULL,
         .tail = NULL
     };
+
+    return queue; 
 }
+
+
+void delete_queue( Proc_Queue** queue )
+{
+    free( *queue );
+    *queue = NULL;
+}
+
 
 void proc_enqueue( Proc_Queue* queue, Proc_Node* node )
 {
-    Proc_Node* last = queue->tail;
-
-    // Se não estava em uma fila, limpamos referências para evitar problemas
-    node->prev = NULL;
+    // "Limpa" o nó para evitar referências mortas
     node->next = NULL;
-    
-    // Atualizamos o último
+    node->prev = NULL;
+
+    // Caso não tenha nenhum elemento, atualiza a estrutura e sai da rotina.
+    // Senão, continue com o caso normal
+    if ( !queue->front && !queue->tail )
+    {
+        queue->front = node;
+        queue->tail = node;
+        return;
+    }
+
+    // Vai para trás do último da fila
+    queue->tail->prev = node;
+    node->next = queue->tail;
+
+    // E agora a última posição atualizada é o nó atual
     queue->tail = node;
-    // Marcamos quem é o penúltimo (NULL a fila não tenha nenhum processo)
-    node->next = last;
-
-
-    // Se existia um último, agora ele é o penúltimo
-    if ( last )
-        last->prev = node;
 }
+
 
 Proc_Node* proc_dequeue( Proc_Queue* queue )
 {
-    Proc_Node* first = queue->front;
-
-    // Ninguém na fila
-    if ( !first )
+    // Nenhum elemento
+    if ( !queue->front )
         return NULL;
     
-    // Segundo vira o primeiro (NULL caso só tenha um na fila)
-    queue->front = first->prev;
+    // Um elemento
+    if ( queue->front->actual == queue->tail->actual )
+    {
+        Proc_Node* last = queue->front;
+        queue->front = NULL;
+        queue->tail = NULL;
+        return last;
+    }
 
-    // Para o segundo, desreferencie o primeiro anterior e se torne primeiro
-    if ( first->prev )
-        first->prev->next = NULL;
+    Proc_Node* old_first = queue->front;
 
-    // Saiu da fila, não tem ninguém atrás nem na frente
-    first->prev = NULL;
-    first->next = NULL;
+    // O primeiro saiu, então o segundo vira o primeiro
+    queue->front = old_first->prev;
+    queue->front->next = NULL;
 
-    return first;
+    // "Limpa" o nó para evitar referências mortas
+    old_first->next = NULL;
+    old_first->prev = NULL;
+
+    return old_first;
 }
 
-void print( Proc_Queue* queue )
-{
 
+void queue_print( Proc_Queue* queue )
+{
+    Proc_Node* node = queue->front;   
+    while ( node )
+    {
+        print_node( node );
+        printf("\n");
+        node = node->prev;
+    }
 }

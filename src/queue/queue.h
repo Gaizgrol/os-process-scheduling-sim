@@ -10,10 +10,16 @@ typedef struct Proc_Queue
     Proc_Node* tail;
 } Proc_Queue;
 
-Proc_Queue new_queue();
+// Construtor
+Proc_Queue* new_queue();
+// Destrutor
+void delete_queue( Proc_Queue** queue );
 
-void proc_enqueue( Proc_Queue* queue, Proc_Node* node );
+// Remove um nó do início da fila
 Proc_Node* proc_dequeue( Proc_Queue* queue );
-void print( Proc_Queue* queue );
+// Adiciona um nó no final da fila
+void proc_enqueue( Proc_Queue* queue, Proc_Node* node );
+// Mostra as posições dos processos e quais são seus vizinhos
+void queue_print( Proc_Queue* queue );
 
 #endif
