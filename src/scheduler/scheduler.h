@@ -3,14 +3,14 @@
 
 #include <stdint.h>
 #include "queue.h"
+#include "table.h"
 
 // Escalonador de processos do simulador
 typedef struct Scheduler
 {
     uint32_t clock;
 
-    uint16_t proc_count;
-    uint16_t proc_max_count;
+    Proc_Table* proc_table;
 
     Proc_Queue* cpu_high_priority_queue;
     Proc_Queue* cpu_low_priority_queue;

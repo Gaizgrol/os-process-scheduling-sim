@@ -3,13 +3,12 @@
 #include "instruction.h"
 #include "process.h"
 
-Process* new_process( uint32_t pid, uint8_t priority, uint32_t burst_time, const char* name )
+Process* new_process( const char* name )
 {
     Process* p = malloc( sizeof(Process) );
 
     *p = (Process) {
-        .pid = pid,
-        .priority = priority,
+        .pid = 0,
         .name = name,
 
         .state = READY,
@@ -46,9 +45,10 @@ Instruction fetch_next_instruction( Process* p )
 
 void print_proc( Process* p )
 {
-    printf( "[%d] %s #%d: %s\n", p->pid, p->name, p->priority, get_state_str(p->state) );
+    printf( "[%d] %s %s: PC: %d => ", p->pid, get_state_str(p->state), p->name, p->program_counter );
     for ( uint32_t i=0; i<p->instructions_size; i++ )
-        printf( "\t %c%s\n", p->program_counter == i ? '>' : '.', get_instruction_str( p->instructions[i] ) );
+        printf( "%c", get_instruction_str( p->instructions[i] )[0] );
+    printf("\n");
 }
 
 

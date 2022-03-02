@@ -11,8 +11,7 @@ Scheduler* new_scheduler()
     {
         .clock = 0,
 
-        .proc_count = 0,
-        .proc_max_count = UINT16_MAX,
+        .proc_table = new_table(),
 
         .cpu_high_priority_queue = new_queue(),
         .cpu_low_priority_queue = new_queue(),
@@ -57,8 +56,6 @@ void delete_scheduler( Scheduler** sch )
 
 void add_proc( Scheduler* sch, Process* proc )
 {
-    sch->proc_count++;
-
     Instruction i = fetch_next_instruction( proc );
     Proc_Node* node = new_node( proc );
 
