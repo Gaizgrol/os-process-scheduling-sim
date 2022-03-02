@@ -20,6 +20,6 @@ Proc_Node* proc_dequeue( Proc_Queue* queue );
 // Adiciona um nó no final da fila
 void proc_enqueue( Proc_Queue* queue, Proc_Node* node );
 // Mostra as posições dos processos e quais são seus vizinhos
-void queue_print( Proc_Queue* queue );
+void print_queue( Proc_Queue* queue );
 
 #endif

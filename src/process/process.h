@@ -22,7 +22,14 @@ Process* new_process( uint32_t pid, uint8_t priority, uint32_t burst_time, const
 // Destrutor
 void delete_process( Process** p );
 
+// Lê a instrução apontada pelo program_counter.
+// Retorna NOOP caso tenha finalizado
+Instruction fetch_next_instruction( Process* p );
 // Mostra informações gerais do processo
 void print_proc( Process* p );
+// "Executa" a próxima instrução do processo.
+// Retorna NOOP caso tenha finalizado
+Instruction run( Process* p );
+
 
 #endif

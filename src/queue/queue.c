@@ -26,6 +26,9 @@ void delete_queue( Proc_Queue** queue )
 
 void proc_enqueue( Proc_Queue* queue, Proc_Node* node )
 {
+    // Atualiza estado do processo
+    node->actual->state = READY;
+    
     // "Limpa" o nó para evitar referências mortas
     node->next = NULL;
     node->prev = NULL;
@@ -77,7 +80,7 @@ Proc_Node* proc_dequeue( Proc_Queue* queue )
 }
 
 
-void queue_print( Proc_Queue* queue )
+void print_queue( Proc_Queue* queue )
 {
     Proc_Node* node = queue->front;   
     while ( node )
@@ -86,4 +89,5 @@ void queue_print( Proc_Queue* queue )
         printf("\n");
         node = node->prev;
     }
+    printf("\n");
 }

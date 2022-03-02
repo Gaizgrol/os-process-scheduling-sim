@@ -6,7 +6,7 @@
 // Tipo de instrução do processo
 typedef enum Instruction
 {
-    CPU, DISK, TAPE, PRINTER
+    NOOP, CPU, DISK, TAPE, PRINTER
 } Instruction;
 
 // Gera instruções aleatórias e salva o conjunto de instruções no ponteiro

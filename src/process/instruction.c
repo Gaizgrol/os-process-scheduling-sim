@@ -33,6 +33,7 @@ const char* get_instruction_str( Instruction i )
 {
     switch (i)
     {
+        case NOOP: return "NOOP";
         case CPU: return "CPU";
         case DISK: return "DISK";
         case TAPE: return "TAPE";
