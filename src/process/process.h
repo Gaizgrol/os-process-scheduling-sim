@@ -8,12 +8,14 @@
 typedef struct Process
 {
     uint32_t pid;
+    uint32_t ppid;
     const char* name;
-
+    
     State state;
     Instruction* instructions;
     uint32_t instructions_size;
     uint32_t program_counter;
+    int8_t priority; 
 } Process;
 
 // Construtor

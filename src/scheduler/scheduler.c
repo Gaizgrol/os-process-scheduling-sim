@@ -118,6 +118,7 @@ void clock_cpu( Scheduler* sch )
         if ( sch->cpu_running_time == sch->cpu_max_time_slice )
         {
             // Quem estava rodando sofre preempção e vai para fila de baixa prioridade
+            running->actual->priority = 0;
             proc_enqueue( sch->cpu_low_priority_queue, running );
             // Espaço para execução agora está vacante
             sch->cpu_running = NULL;
@@ -129,6 +130,7 @@ void clock_cpu( Scheduler* sch )
     // Próxima instrução é IO-bound:
     else
     {
+        running->actual->priority = -1;
         switch ( i )
         {
             // Disco
@@ -176,7 +178,7 @@ void clock_disk( Scheduler* sch )
         switch ( i )
         {
             // CPU: Retorna para a fila de baixa prioridade
-            case CPU: proc_enqueue( sch->cpu_low_priority_queue, running ); break;
+            case CPU: running->actual->priority = 0; proc_enqueue( sch->cpu_low_priority_queue, running ); break;
             // Disco
             case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
             // Fita magnética
@@ -224,7 +226,7 @@ void clock_tape( Scheduler* sch )
         switch ( i )
         {
             // CPU: Retorna para a fila de alta prioridade
-            case CPU: proc_enqueue( sch->cpu_high_priority_queue, running ); break;
+            case CPU: running->actual->priority = 1; proc_enqueue( sch->cpu_high_priority_queue, running ); break;
             // Disco
             case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
             // Fita magnética
@@ -272,7 +274,7 @@ void clock_printer( Scheduler* sch )
         switch ( i )
         {
             // CPU: Retorna para a fila de alta prioridade
-            case CPU: proc_enqueue( sch->cpu_high_priority_queue, running ); break;
+            case CPU: running->actual->priority = 1; proc_enqueue( sch->cpu_high_priority_queue, running ); break;
             // Disco
             case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
             // Fita magnética
