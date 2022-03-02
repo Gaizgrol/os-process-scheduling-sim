@@ -27,7 +27,7 @@ void test1()
     };
 
     for ( uint8_t i=0; i<4; i++ )
-        print( procs[i] );
+        print_proc( procs[i] );
 
     printf( "Adicionando na fila...\n" );
 

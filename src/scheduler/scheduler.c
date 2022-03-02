@@ -17,11 +17,11 @@ Scheduler* new_scheduler()
         .cpu_high_priority_queue = new_queue(),
         .cpu_low_priority_queue = new_queue(),
         .cpu_running = NULL,
-        .cpu_max_time_slice = 3,
+        .cpu_max_time_slice = 2,
 
         .io_disk_queue = new_queue(),
         .io_disk_running = NULL,
-        .io_disk_duration = 8,
+        .io_disk_duration = 4,
 
         .io_tape_queue = new_queue(),
         .io_tape_running = NULL,
@@ -29,11 +29,12 @@ Scheduler* new_scheduler()
 
         .io_printer_queue = new_queue(),
         .io_printer_running = NULL,
-        .io_printer_duration = 14
+        .io_printer_duration = 8
     };
 
     return sch;
 }
+
 
 void delete_scheduler( Scheduler** sch )
 {
@@ -48,6 +49,9 @@ void delete_scheduler( Scheduler** sch )
     free( s );
     *sch = NULL;
 }
+
+
+// void add_proc( Scheduler* sch, Process* proc );
 
 
 void clock( Scheduler* sch )
@@ -109,3 +113,5 @@ void io_printer_fetch_next( Scheduler* sch )
     // Há algum processo a ser executado
     sch->io_printer_running = proc_dequeue( q );
 }
+
+// void kill_proc( Scheduler* sch, uint32_t pid );

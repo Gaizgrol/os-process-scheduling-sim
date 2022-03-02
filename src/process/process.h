@@ -2,15 +2,19 @@
 #define PROCESS_H
 
 #include <stdint.h>
+#include "instruction.h"
 #include "state.h"
 
 typedef struct Process
 {
     uint32_t pid;
-    uint32_t cpu_burst_time;
     uint8_t priority;
-    State state;
     const char* name;
+
+    State state;
+    Instruction* instructions;
+    uint32_t instructions_size;
+    uint32_t program_counter;
 } Process;
 
 // Construtor
@@ -19,6 +23,6 @@ Process* new_process( uint32_t pid, uint8_t priority, uint32_t burst_time, const
 void delete_process( Process** p );
 
 // Mostra informações gerais do processo
-void print( Process* p );
+void print_proc( Process* p );
 
 #endif

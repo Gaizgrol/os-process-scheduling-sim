@@ -22,7 +22,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CFLAGS := $(INC_FLAGS) -Wall -Werror -std=c17
+CFLAGS := $(INC_FLAGS) -Wall -Werror -std=c17 -D_POSIX_C_SOURCE=199309L
 
 # The final build step.
 $(TARGET_EXEC): $(OBJS)
