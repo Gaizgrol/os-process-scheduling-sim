@@ -1,11 +1,21 @@
 #include <stdio.h>
 #include "queue.h"
+#include "scheduler.h"
 
-void here( uint8_t i ) {
-    printf( "Cheguei aqui: %d\n", i );
-}
+void test1();
+void test2();
+void test3();
 
 int main( int argc, char** argv )
+{
+    // test1();
+    // test2();
+    test3();
+
+    return 0;
+}
+
+void test1()
 {
     Proc_Queue* q = new_queue();
 
@@ -46,8 +56,54 @@ int main( int argc, char** argv )
 
     // Fim do programa
     printf( "Fim do teste!\n" );
+}
 
+void test2()
+{
+    Scheduler* s = new_scheduler();
+
+    proc_enqueue( s->cpu_high_priority_queue, &(Proc_Node){
+        .actual = new_process( 123, 0, 5, "Salve" )
+    });
+    proc_enqueue( s->cpu_high_priority_queue, &(Proc_Node){
+        .actual = new_process( 231, 0, 5, "Coe" )
+    });
+    proc_enqueue( s->cpu_low_priority_queue, &(Proc_Node){
+        .actual = new_process( 312, 0, 5, "Menor" )
+    });
+    proc_enqueue( s->cpu_low_priority_queue, &(Proc_Node){
+        .actual = new_process( 213, 0, 5, "Lek" )
+    });
+    proc_enqueue( s->cpu_high_priority_queue, &(Proc_Node){
+        .actual = new_process( 321, 0, 5, "Eae" )
+    });
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    cpu_fetch_next( s );
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    cpu_fetch_next( s );
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    cpu_fetch_next( s );
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    cpu_fetch_next( s );
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    cpu_fetch_next( s );
+
+    printf( "%s\n", ( s->cpu_running ) ? s->cpu_running->actual->name : "NULL" );
+
+    delete_scheduler( &s );
+}
+
+void test3()
+{
     
-
-    return 0;
 }
