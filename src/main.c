@@ -44,7 +44,9 @@ int main( int argc, char** argv )
 
         // Desenha os processos
         for ( uint16_t i=0; i<s->proc_table->proc_count; i++ )
-            draw_rect( canvas, 1, (SDL_Color){ 255, 0, 0, 255 }, 16*i + i*32, 16, 32, 32 );
+        {
+            draw_proc( s->proc_table->procs[i]->actual, canvas, WINDOW_WIDTH-PROCESS_DRAW_WIDTH, (PROCESS_DRAW_HEIGHT+1)*i );
+        }
 
         // Atualiza a tela
         refresh( canvas );

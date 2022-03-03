@@ -9,7 +9,7 @@ Scheduler* new_scheduler()
     
     *sch = (Scheduler)
     {
-        .clock = 0,
+        .time_elapsed = 0,
 
         .proc_table = new_table(),
 
@@ -66,7 +66,7 @@ void add_proc( Scheduler* sch, Process* proc )
 
 void clock( Scheduler* sch )
 {
-    sch->clock++;
+    sch->time_elapsed++;
     clock_cpu( sch );
     clock_disk( sch );
     clock_tape( sch );

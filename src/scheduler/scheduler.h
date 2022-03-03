@@ -8,7 +8,7 @@
 // Escalonador de processos do simulador
 typedef struct Scheduler
 {
-    uint32_t clock;
+    uint32_t time_elapsed;
 
     Proc_Table* proc_table;
 

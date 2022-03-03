@@ -9,7 +9,7 @@ Process* new_process( const char* name )
 
     *p = (Process) {
         .pid = 0,
-        .ppid = 100000 + rand() % 899999,
+        .ppid = 123456,
         .name = name,
 
         .state = READY,
@@ -42,6 +42,17 @@ Instruction fetch_next_instruction( Process* p )
         return NOOP;
     
     return p->instructions[ p->program_counter ];
+}
+
+
+void draw_proc( Process* p, UI* canvas, int x, int y )
+{
+    draw_rect( canvas, 1, RED, x, y, PROCESS_DRAW_WIDTH, PROCESS_DRAW_HEIGHT );
+            
+    char pid[7];
+    sprintf( pid, "%d", p->pid );
+
+    draw_text( canvas, pid, WHITE, x+6, y+PROCESS_DRAW_HEIGHT/2 );
 }
 
 
