@@ -28,7 +28,6 @@ int main( int argc, char** argv )
             sprintf( name, "Processo #%d", i++ );
 
             Process* p = new_process( name );
-            print_proc( p );
             add_proc( s, p );
         }
     } while ( strcmp( cmd, "s" ) != 0 );

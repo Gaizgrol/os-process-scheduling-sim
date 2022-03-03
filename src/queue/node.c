@@ -32,7 +32,7 @@ void print_node( Proc_Node* node )
     }
     
     printf(
-        "( %s <= [ %s ] => %s )",
+        "%s <= [ %s ] => %s",
         (node->next) ? node->next->actual->name : "NULL",
         node->actual->name,
         (node->prev) ? node->prev->actual->name : "NULL"

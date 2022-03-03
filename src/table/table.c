@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "table.h"
 
@@ -23,6 +24,15 @@ void delete_table( Proc_Table** table )
     (*table)->procs = NULL;
     free( *table );
     *table = NULL;
+}
+
+
+void print_table( Proc_Table* table )
+{
+    printf( "Processos: %d/%d\n", table->proc_count, table->proc_max_count );
+    for ( uint16_t i=0; i<table->proc_count; i++ )
+        print_proc( table->procs[i]->actual );
+    printf( "\n" );
 }
 
 

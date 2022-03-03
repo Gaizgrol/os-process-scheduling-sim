@@ -56,8 +56,11 @@ void delete_scheduler( Scheduler** sch )
 
 void add_proc( Scheduler* sch, Process* proc )
 {
+    Proc_Node* node = table_add( sch->proc_table, proc );
+    if ( !node )
+        return;
+
     Instruction i = fetch_next_instruction( proc );
-    Proc_Node* node = new_node( proc );
 
     switch (i)
     {
@@ -353,6 +356,7 @@ void io_printer_fetch_next( Scheduler* sch )
 void print_scheduler( Scheduler* sch )
 {
     printf( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" );
+    print_table( sch->proc_table );
     printf( "== CPU RUNNING ==\n" );
     if ( sch->cpu_running )
     {
