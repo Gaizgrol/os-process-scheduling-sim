@@ -27,10 +27,6 @@ a estratégia de seleção *Round Robin (ou Circular)* com *Feedback*.
     Ferramenta para controlar a criação e limpeza dos arquivos executáveis usados neste projeto. Para Windows, o MinGW já possui o make e geralmente distribuições Linux já vem com a ferramenta instalada. Caso não possua a ferramenta, baixe do site oficial: https://www.gnu.org/software/make/;
 
 
-- ### SDL2:
-    O Simple DirectMedia Layer é utilizado neste projeto para gerenciar janelas e gráficos em baixo nível. As bibliotecas de execução e desenvolvimento estão em https://www.libsdl.org/download-2.0.php
-    
-
 ## :computer: Executando o projeto:
 
 ### A partir do código fonte:
