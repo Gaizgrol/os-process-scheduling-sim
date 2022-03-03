@@ -9,12 +9,14 @@ Process* new_process( const char* name )
 
     *p = (Process) {
         .pid = 0,
+        .ppid = 100000 + rand() % 899999,
         .name = name,
 
         .state = READY,
         .instructions = NULL,
         .instructions_size = 0,
-        .program_counter = 0
+        .program_counter = 0,
+        .priority = 1
     };
     
     generate_instruction_set( &p->instructions, &p->instructions_size );
