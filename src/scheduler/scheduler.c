@@ -61,7 +61,6 @@ void add_proc( Scheduler* sch, Process* proc )
         return;
 
     proc_enqueue( sch->cpu_high_priority_queue, node );
-    print_scheduler( sch );
 }
 
 
