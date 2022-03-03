@@ -28,11 +28,12 @@ void delete_table( Proc_Table** table )
 
 Proc_Node* table_add( Proc_Table* table, Process* proc )
 {
-    if ( table->proc_count == table->proc_max_count )
+    if ( table->proc_count >= table->proc_max_count )
         return NULL;
 
     Proc_Node* node = new_node( proc );
     
+    // PIDs únicos
     do {
         proc->pid = 100000 + rand() % 899999;
     } while( table_find( table, proc->pid ) != NULL );
@@ -44,11 +45,29 @@ Proc_Node* table_add( Proc_Table* table, Process* proc )
 
 Proc_Node* table_find( Proc_Table* table, uint32_t pid )
 {
+    for ( uint16_t i=0; i<table->proc_count; i++ )
+        if ( table->procs[i]->actual->pid == pid )
+            return table->procs[i];
     return NULL;
 }
 
 
 Proc_Node* table_remove( Proc_Table* table, uint32_t pid )
 {
-    return NULL;
+    Proc_Node* node = table_find( table, pid );
+    if ( !node )
+        return NULL;
+    
+    Proc_Node* prev = node->prev;
+    Proc_Node* next = node->next;
+
+    // Remove de possíveis filas
+    if ( prev )
+        node->prev->next = next;
+    if ( next )
+        node->next->prev = prev;
+
+    node->actual->state = TERMINATED;
+
+    return node;
 }

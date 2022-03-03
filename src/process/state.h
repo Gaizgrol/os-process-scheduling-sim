@@ -4,7 +4,7 @@
 // Estado de execução do processo
 typedef enum State
 {
-    READY, RUNNING, IO
+    READY, RUNNING, IO, TERMINATED
 } State;
 
 // Busca a representação em "string" de um determinado estado
