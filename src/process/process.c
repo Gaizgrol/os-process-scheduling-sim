@@ -48,6 +48,9 @@ Instruction fetch_next_instruction( Process* p )
 void print_proc( Process* p )
 {
     printf( "PID: %d | #%d | %s %s (PPID: %d ) | PC: %d | Instr: ", p->pid, p->priority, get_state_str(p->state), p->name, p->ppid, p->program_counter );
+    for ( uint32_t i=0; i<p->program_counter; i++ )
+        printf( "%c", get_instruction_str( p->instructions[i] )[0] );
+    printf( "!" );
     for ( uint32_t i=p->program_counter; i<p->instructions_size; i++ )
         printf( "%c", get_instruction_str( p->instructions[i] )[0] );
     printf("\n");

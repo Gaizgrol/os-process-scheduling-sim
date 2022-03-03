@@ -60,22 +60,7 @@ void add_proc( Scheduler* sch, Process* proc )
     if ( !node )
         return;
 
-    Instruction i = fetch_next_instruction( proc );
-
-    switch (i)
-    {
-        // CPU: Processos novos entram na fila de alta prioridade
-        case CPU: proc_enqueue( sch->cpu_high_priority_queue, node ); break;
-        // Disco
-        case DISK: proc_enqueue( sch->io_disk_queue, node ); break;
-        // Fita magnética
-        case TAPE: proc_enqueue( sch->io_tape_queue, node ); break;
-        // Impressora
-        case PRINTER: proc_enqueue( sch->io_printer_queue, node ); break;
-        // Próxima instrução não existe: programa finalizou
-        default: /* Mata o processo */ break;
-    }
-
+    proc_enqueue( sch->cpu_high_priority_queue, node );
     print_scheduler( sch );
 }
 
@@ -100,54 +85,43 @@ void clock_cpu( Scheduler* sch )
         // Não há próximos candidatos, sai da rotina
         if ( !sch->cpu_high_priority_queue->front && !sch->cpu_low_priority_queue->front )
             return;
-
-        // Zera o relógio, coloca o processo para executar e sai da rotina
+        // Zera o relógio e coloca o candidato para executar
         sch->cpu_running_time = 0;
         cpu_fetch_next( sch );
-        run( sch->cpu_running->actual );
-        return;
+        running = sch->cpu_running;
     }
-    
-    // Tem alguém rodando!
-    // Aumenta o tempo de execução
-    sch->cpu_running_time++;
 
-    Instruction i = fetch_next_instruction( running->actual );
+    // Verifica o tipo de instrução do candidato de execução
+    Instruction next = fetch_next_instruction( running->actual );
 
-    // Próxima instrução ainda é CPU-bound
-    if ( i == CPU )
-    {
-        // Tempo estourou:
-        if ( sch->cpu_running_time == sch->cpu_max_time_slice )
-        {
-            // Quem estava rodando sofre preempção e vai para fila de baixa prioridade
-            running->actual->priority = 0;
-            proc_enqueue( sch->cpu_low_priority_queue, running );
-            // Espaço para execução agora está vacante
-            sch->cpu_running = NULL;
-        }
-        // Se não estourou, segue o baile
-        else
-            run( running->actual );
-    }
-    // Próxima instrução é IO-bound:
-    else
-    {
+    if ( next != CPU )
         running->actual->priority = -1;
-        switch ( i )
-        {
-            // Disco
-            case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
-            // Fita magnética
-            case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
-            // Impressora
-            case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
-            // Próxima instrução não existe: programa finalizou
-            default: /* Mata o processo */ break;
-        }
-        // Espaço para execução fica vacante
-        sch->cpu_running = NULL;
+
+    switch ( next )
+    {
+        case CPU:
+            // Pode continuar execução:
+            if ( sch->cpu_running_time < sch->cpu_max_time_slice )
+            {
+                run( running->actual );
+                sch->cpu_running_time++;
+                return;
+            }
+            // Estourou o tempo:
+            proc_enqueue( sch->cpu_low_priority_queue, running );
+            running->actual->priority = 0;
+        break;
+        case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
+        // Fita magnética
+        case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
+        // Impressora
+        case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
+        // Próxima instrução não existe: programa finalizou
+        default: running->actual->state = TERMINATED; break;
     }
+
+    // Espaço para execução será buscado somente no próximo ciclo
+    sch->cpu_running = NULL;
 }
 
 
@@ -161,7 +135,6 @@ void clock_disk( Scheduler* sch )
         // Não há próximos candidatos, sai da rotina
         if ( !sch->io_disk_queue->front )
             return;
-
         // Zera o relógio, coloca o processo para iniciar o IO e sai da rotina
         sch->io_disk_running_time = 0;
         io_disk_fetch_next( sch );
@@ -173,29 +146,22 @@ void clock_disk( Scheduler* sch )
     // Aumenta o tempo de IO
     sch->io_disk_running_time++;
 
-    // Terminou o tempo de IO, sofre preempção
-    if ( sch->io_disk_running_time == sch->io_disk_duration )
+    if ( sch->io_disk_running_time < sch->io_disk_duration )
+        return;
+
+    Instruction i = fetch_next_instruction( running->actual );
+
+    if ( i != NOOP )
     {
-        Instruction i = fetch_next_instruction( running->actual );
-
-        switch ( i )
-        {
-            // CPU: Retorna para a fila de baixa prioridade
-            case CPU: running->actual->priority = 0; proc_enqueue( sch->cpu_low_priority_queue, running ); break;
-            // Disco
-            case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
-            // Fita magnética
-            case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
-            // Impressora
-            case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
-            // Próxima instrução não existe: programa finalizou
-            default: /* Mata o processo */ break;
-        }
-
-        // Espaço para IO em disco fica aberto
-        sch->io_disk_running = NULL;
+        // Terminou o tempo de IO, volta para a fila de baixa prioridade
+        running->actual->priority = 0;
+        proc_enqueue( sch->cpu_low_priority_queue, running );
     }
-    // Caso não tenha terminado, aguarde o fim da operação de IO nos próximos ciclos
+    else
+        running->actual->state = TERMINATED;
+
+    // Espaço para IO em disco fica aberto
+    sch->io_disk_running = NULL;
 }
 
 
@@ -209,7 +175,6 @@ void clock_tape( Scheduler* sch )
         // Não há próximos candidatos, sai da rotina
         if ( !sch->io_tape_queue->front )
             return;
-
         // Zera o relógio, coloca o processo para iniciar o IO e sai da rotina
         sch->io_tape_running_time = 0;
         io_tape_fetch_next( sch );
@@ -221,29 +186,22 @@ void clock_tape( Scheduler* sch )
     // Aumenta o tempo de IO
     sch->io_tape_running_time++;
 
-    // Terminou o tempo de IO, sofre preempção
-    if ( sch->io_tape_running_time == sch->io_tape_duration )
+    if ( sch->io_tape_running_time < sch->io_tape_duration )
+        return;
+
+    Instruction i = fetch_next_instruction( running->actual );
+
+    if ( i != NOOP )
     {
-        Instruction i = fetch_next_instruction( running->actual );
-
-        switch ( i )
-        {
-            // CPU: Retorna para a fila de alta prioridade
-            case CPU: running->actual->priority = 1; proc_enqueue( sch->cpu_high_priority_queue, running ); break;
-            // Disco
-            case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
-            // Fita magnética
-            case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
-            // Impressora
-            case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
-            // Próxima instrução não existe: programa finalizou
-            default: /* Mata o processo */ break;
-        }
-
-        // Espaço para IO em disco fica aberto
-        sch->io_tape_running = NULL;
+        // Terminou o tempo de IO, volta para a fila de alta prioridade
+        running->actual->priority = 1;
+        proc_enqueue( sch->cpu_high_priority_queue, running );
     }
-    // Caso não tenha terminado, aguarde o fim da operação de IO nos próximos ciclos
+    else
+        running->actual->state = TERMINATED;
+
+    // Espaço para IO em fita fica aberto
+    sch->io_tape_running = NULL;
 }
 
 
@@ -257,7 +215,6 @@ void clock_printer( Scheduler* sch )
         // Não há próximos candidatos, sai da rotina
         if ( !sch->io_printer_queue->front )
             return;
-
         // Zera o relógio, coloca o processo para iniciar o IO e sai da rotina
         sch->io_printer_running_time = 0;
         io_printer_fetch_next( sch );
@@ -269,29 +226,22 @@ void clock_printer( Scheduler* sch )
     // Aumenta o tempo de IO
     sch->io_printer_running_time++;
 
-    // Terminou o tempo de IO, sofre preempção
-    if ( sch->io_printer_running_time == sch->io_printer_duration )
+    if ( sch->io_printer_running_time < sch->io_printer_duration )
+        return;
+
+    Instruction i = fetch_next_instruction( running->actual );
+
+    if ( i != NOOP )
     {
-        Instruction i = fetch_next_instruction( running->actual );
-
-        switch ( i )
-        {
-            // CPU: Retorna para a fila de alta prioridade
-            case CPU: running->actual->priority = 1; proc_enqueue( sch->cpu_high_priority_queue, running ); break;
-            // Disco
-            case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
-            // Fita magnética
-            case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
-            // Impressora
-            case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
-            // Próxima instrução não existe: programa finalizou
-            default: /* Mata o processo */ break;
-        }
-
-        // Espaço para IO em disco fica aberto
-        sch->io_printer_running = NULL;
+        // Terminou o tempo de IO, volta para a fila de alta prioridade
+        running->actual->priority = 1;
+        proc_enqueue( sch->cpu_high_priority_queue, running );
     }
-    // Caso não tenha terminado, aguarde o fim da operação de IO nos próximos ciclos
+    else
+        running->actual->state = TERMINATED;
+
+    // Espaço para IO em fita fica aberto
+    sch->io_printer_running = NULL;
 }
 
 
