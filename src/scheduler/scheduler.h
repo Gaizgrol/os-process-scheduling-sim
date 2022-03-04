@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "queue.h"
+#include "renderer.h"
 #include "table.h"
 
 // Escalonador de processos do simulador
@@ -34,6 +35,8 @@ typedef struct Scheduler
     uint8_t io_printer_duration;
 } Scheduler;
 
+static const int COUNTER_HEIGHT = 8;
+
 // Construtor
 Scheduler* new_scheduler();
 // Destrutor
@@ -61,6 +64,9 @@ void io_tape_fetch_next( Scheduler* sch );
 void io_printer_fetch_next( Scheduler* sch );
 // Mata um processo
 void kill_proc( Scheduler* sch, uint32_t pid );
+
+void draw_counter( UI* canvas, int count, int max, int x, int y );
+void draw_scheduler( Scheduler* sch, UI* canvas );
 // Mostra informações do escalonador no terminal
 void print_scheduler( Scheduler* sch );
 

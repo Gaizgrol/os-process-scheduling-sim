@@ -27,6 +27,13 @@ void delete_table( Proc_Table** table )
 }
 
 
+void draw_table( Proc_Table* table, UI* canvas )
+{
+    for ( uint16_t i=0; i<table->proc_count; i++ )
+        draw_proc( table->procs[i]->actual, canvas, 0, (PROCESS_DRAW_HEIGHT+1)*i );
+}
+
+
 void print_table( Proc_Table* table )
 {
     printf( "Processos: %d/%d\n", table->proc_count, table->proc_max_count );

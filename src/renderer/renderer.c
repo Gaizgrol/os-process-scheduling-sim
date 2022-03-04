@@ -50,6 +50,12 @@ void clear( UI* canvas )
     SDL_RenderClear( canvas->ctx );
 }
 
+void draw_line( UI* canvas, SDL_Color color, int x0, int y0, int x1, int y1 )
+{
+    SDL_SetRenderDrawColor( canvas->ctx, color.r, color.g, color.b, color.a );
+    SDL_RenderDrawLine( canvas->ctx, x0, y0, x1, y1 );
+}
+
 void draw_rect( UI* canvas, int filled, SDL_Color color, int x, int y, int w, int h )
 {
     SDL_SetRenderDrawColor( canvas->ctx, color.r, color.g, color.b, color.a );
@@ -70,6 +76,16 @@ void draw_text( UI* canvas, const char* text, SDL_Color color, int x, int y )
 
     SDL_DestroyTexture( txtr );
     SDL_FreeSurface( surf );
+}
+
+SDL_Color random_dark_color()
+{
+    return (SDL_Color) {
+        .r = 32 + rand() % 95,
+        .g = 32 + rand() % 95,
+        .b = 32 + rand() % 95,
+        .a = SDL_ALPHA_OPAQUE
+    };
 }
 
 void refresh( UI* canvas )

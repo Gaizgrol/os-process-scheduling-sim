@@ -16,11 +16,13 @@ typedef struct Process
     Instruction* instructions;
     uint32_t instructions_size;
     uint32_t program_counter;
-    int8_t priority; 
+    int8_t priority;
+
+    SDL_Color color;
 } Process;
 
 static const int PROCESS_DRAW_WIDTH = 200;
-static const int PROCESS_DRAW_HEIGHT = 32;
+static const int PROCESS_DRAW_HEIGHT = 64;
 
 // Construtor
 Process* new_process( const char* name );

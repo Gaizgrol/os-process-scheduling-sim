@@ -11,10 +11,12 @@ int main( int argc, char** argv )
 {
     // Desenha a tela preta
     UI* canvas = new_ui();
-    clear( canvas );
-    refresh( canvas );
 
     Scheduler* s = new_scheduler();
+    
+    clear( canvas );
+    draw_scheduler( s, canvas );
+    refresh( canvas );
 
     char cmd[255];
     int i=0;
@@ -42,12 +44,8 @@ int main( int argc, char** argv )
             print_scheduler( s );
         }
 
-        // Desenha os processos
-        for ( uint16_t i=0; i<s->proc_table->proc_count; i++ )
-        {
-            draw_proc( s->proc_table->procs[i]->actual, canvas, WINDOW_WIDTH-PROCESS_DRAW_WIDTH, (PROCESS_DRAW_HEIGHT+1)*i );
-        }
-
+        // Desenha o escalonador
+        draw_scheduler( s, canvas );
         // Atualiza a tela
         refresh( canvas );
     } while ( strcmp( cmd, "s" ) != 0 );
