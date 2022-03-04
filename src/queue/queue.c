@@ -24,10 +24,10 @@ void delete_queue( Proc_Queue** queue )
 }
 
 
-void proc_enqueue( Proc_Queue* queue, Proc_Node* node )
+void proc_enqueue( Proc_Queue* queue, Proc_Node* node, State state )
 {
     // Atualiza estado do processo
-    node->actual->state = READY;
+    node->actual->state = state;
     
     // "Limpa" o nó para evitar referências mortas
     node->next = NULL;

@@ -60,7 +60,7 @@ void add_proc( Scheduler* sch, Process* proc )
     if ( !node )
         return;
 
-    proc_enqueue( sch->cpu_high_priority_queue, node );
+    proc_enqueue( sch->cpu_high_priority_queue, node, READY );
 }
 
 
@@ -107,14 +107,14 @@ void clock_cpu( Scheduler* sch )
                 return;
             }
             // Estourou o tempo:
-            proc_enqueue( sch->cpu_low_priority_queue, running );
+            proc_enqueue( sch->cpu_low_priority_queue, running, READY );
             running->actual->priority = 0;
         break;
-        case DISK: proc_enqueue( sch->io_disk_queue, running ); break;
+        case DISK: proc_enqueue( sch->io_disk_queue, running, IO ); break;
         // Fita magnética
-        case TAPE: proc_enqueue( sch->io_tape_queue, running ); break;
+        case TAPE: proc_enqueue( sch->io_tape_queue, running, IO ); break;
         // Impressora
-        case PRINTER: proc_enqueue( sch->io_printer_queue, running ); break;
+        case PRINTER: proc_enqueue( sch->io_printer_queue, running, IO ); break;
         // Próxima instrução não existe: programa finalizou
         default: running->actual->state = TERMINATED; break;
     }
@@ -150,7 +150,7 @@ void clock_disk( Scheduler* sch )
         {
             // Terminou o tempo de IO, volta para a fila de baixa prioridade
             running->actual->priority = 0;
-            proc_enqueue( sch->cpu_low_priority_queue, running );
+            proc_enqueue( sch->cpu_low_priority_queue, running, READY );
         }
         else
             running->actual->state = TERMINATED;
@@ -191,7 +191,7 @@ void clock_tape( Scheduler* sch )
         {
             // Terminou o tempo de IO, volta para a fila de alta prioridade
             running->actual->priority = 1;
-            proc_enqueue( sch->cpu_high_priority_queue, running );
+            proc_enqueue( sch->cpu_high_priority_queue, running, READY );
         }
         else
             running->actual->state = TERMINATED;
@@ -232,7 +232,7 @@ void clock_printer( Scheduler* sch )
         {
             // Terminou o tempo de IO, volta para a fila de alta prioridade
             running->actual->priority = 1;
-            proc_enqueue( sch->cpu_high_priority_queue, running );
+            proc_enqueue( sch->cpu_high_priority_queue, running, READY );
         }
         else
             running->actual->state = TERMINATED;
@@ -326,32 +326,41 @@ void draw_scheduler( Scheduler* sch, UI* canvas )
     int margin = 16;
     int w = PROCESS_DRAW_WIDTH+2*margin+NODE_DRAW_WIDTH;
     int h = margin+NODE_DRAW_HEIGHT;
+    
+    // Desculpa:
+
     // CPU bound
     draw_rect( canvas, 1, CYAN, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
     if ( sch->cpu_running ) draw_node( sch->cpu_running, canvas, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT );
     draw_counter( canvas, sch->cpu_running_time, sch->cpu_max_time_slice, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     draw_rect( canvas, 1, BLUE, w, h-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->cpu_high_priority_queue, canvas, w, h-NODE_DRAW_HEIGHT );
+    draw_text( canvas, "CPU Low Priority", WHITE, w, h-NODE_DRAW_HEIGHT-2*COUNTER_HEIGHT );
     draw_rect( canvas, 1, BLUE, w, h*2-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->cpu_low_priority_queue, canvas, w, h*2-NODE_DRAW_HEIGHT );
+    draw_text( canvas, "CPU High Priority", WHITE, w, h*2-NODE_DRAW_HEIGHT-2*COUNTER_HEIGHT );
+    
     // IO bound
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
     draw_counter( canvas, sch->io_disk_running_time, sch->io_disk_duration, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_disk_running ) draw_node( sch->io_disk_running, canvas, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*4-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_disk_queue, canvas, w, h*4-NODE_DRAW_HEIGHT );
+    draw_text( canvas, "IO Disk Waiting", WHITE, w, h*4-NODE_DRAW_HEIGHT-2*COUNTER_HEIGHT );
     
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
     draw_counter( canvas, sch->io_tape_running_time, sch->io_tape_duration, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_tape_running ) draw_node( sch->io_tape_running, canvas, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*5-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_tape_queue, canvas, w, h*5-NODE_DRAW_HEIGHT );
+    draw_text( canvas, "IO Tape Waiting", WHITE, w, h*5-NODE_DRAW_HEIGHT-2*COUNTER_HEIGHT );
     
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
     draw_counter( canvas, sch->io_printer_running_time, sch->io_printer_duration, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_printer_running ) draw_node( sch->io_printer_running, canvas, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*6-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_printer_queue, canvas, w, h*6-NODE_DRAW_HEIGHT );
+    draw_text( canvas, "IO Printer Waiting", WHITE, w, h*6-NODE_DRAW_HEIGHT-2*COUNTER_HEIGHT );
 }
 
 

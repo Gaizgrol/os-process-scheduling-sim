@@ -19,7 +19,7 @@ void delete_queue( Proc_Queue** queue );
 // Remove um nó do início da fila
 Proc_Node* proc_dequeue( Proc_Queue* queue );
 // Adiciona um nó no final da fila
-void proc_enqueue( Proc_Queue* queue, Proc_Node* node );
+void proc_enqueue( Proc_Queue* queue, Proc_Node* node, State state );
 
 void draw_queue( Proc_Queue* queue, UI* canvas, int x, int y );
 // Mostra as posições dos processos e quais são seus vizinhos
