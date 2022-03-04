@@ -80,6 +80,18 @@ Proc_Node* proc_dequeue( Proc_Queue* queue )
 }
 
 
+void draw_queue( Proc_Queue* queue, UI* canvas, int x, int y )
+{
+    int i=0;
+    Proc_Node* node = queue->front;   
+    while ( node )
+    {
+        draw_node( node, canvas, x+(i++)*(NODE_DRAW_WIDTH+NODE_ARROW_WIDTH), y );
+        node = node->prev;
+    }
+}
+
+
 void print_queue( Proc_Queue* queue )
 {
     Proc_Node* node = queue->front;   

@@ -2,6 +2,7 @@
 #define QUEUE_H
 
 #include "node.h"
+#include "renderer.h"
 
 // Fila de processos implementando uma lista duplamente conectada
 typedef struct Proc_Queue
@@ -19,6 +20,8 @@ void delete_queue( Proc_Queue** queue );
 Proc_Node* proc_dequeue( Proc_Queue* queue );
 // Adiciona um nó no final da fila
 void proc_enqueue( Proc_Queue* queue, Proc_Node* node );
+
+void draw_queue( Proc_Queue* queue, UI* canvas, int x, int y );
 // Mostra as posições dos processos e quais são seus vizinhos
 void print_queue( Proc_Queue* queue );
 

@@ -2,6 +2,7 @@
 #define TABLE_H
 
 #include "node.h"
+#include "renderer.h"
 
 // "Tabela" de processos
 typedef struct Proc_Table
@@ -16,8 +17,10 @@ Proc_Table* new_table();
 // Destrutor
 void delete_table( Proc_Table** table );
 
+void draw_table( Proc_Table* table, UI* canvas );
 // Mostra a tabela de processos
 void print_table( Proc_Table* table );
+
 // Adiciona na tabela e devolve o nó correspondente ao novo processo
 Proc_Node* table_add( Proc_Table* table, Process* proc );
 // Encontra um processo com o PID fornecido. Caso não exista, NULL é retornado

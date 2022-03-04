@@ -9,7 +9,7 @@ Scheduler* new_scheduler()
     
     *sch = (Scheduler)
     {
-        .clock = 0,
+        .time_elapsed = 0,
 
         .proc_table = new_table(),
 
@@ -61,13 +61,12 @@ void add_proc( Scheduler* sch, Process* proc )
         return;
 
     proc_enqueue( sch->cpu_high_priority_queue, node );
-    print_scheduler( sch );
 }
 
 
 void clock( Scheduler* sch )
 {
-    sch->clock++;
+    sch->time_elapsed++;
     clock_cpu( sch );
     clock_disk( sch );
     clock_tape( sch );
@@ -301,6 +300,55 @@ void io_printer_fetch_next( Scheduler* sch )
 
 
 // void kill_proc( Scheduler* sch, uint32_t pid );
+
+
+void draw_counter( UI* canvas, int count, int max, int x, int y )
+{
+    float w = (float) NODE_DRAW_WIDTH / max, h = COUNTER_HEIGHT;
+    for ( int i=0; i<max; i++ )
+        draw_rect( canvas, 1, GRAY, x + i*w, y, w-1, h );
+
+    for ( int i=0; i<count; i++ )
+        draw_rect( canvas, 1, CYAN, x + i*w + 1, y+1, w-2, h-2 );
+}
+
+
+void draw_scheduler( Scheduler* sch, UI* canvas )
+{
+    // Desenha os processos na tabela
+    draw_table( sch->proc_table, canvas );
+
+    // Desenha as filas de processos
+    int margin = 16;
+    int w = PROCESS_DRAW_WIDTH+2*margin+NODE_DRAW_WIDTH;
+    int h = margin+NODE_DRAW_HEIGHT;
+    // CPU bound
+    draw_rect( canvas, 1, CYAN, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
+    if ( sch->cpu_running ) draw_node( sch->cpu_running, canvas, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT );
+    draw_counter( canvas, sch->cpu_running ? sch->cpu_running_time : 0, sch->cpu_max_time_slice, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    draw_rect( canvas, 1, BLUE, w, h-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_queue( sch->cpu_high_priority_queue, canvas, w, h-NODE_DRAW_HEIGHT );
+    draw_rect( canvas, 1, BLUE, w, h*2-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_queue( sch->cpu_low_priority_queue, canvas, w, h*2-NODE_DRAW_HEIGHT );
+    // IO bound
+    draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_counter( canvas, sch->io_disk_running ? sch->io_disk_running_time+1 : 0, sch->io_disk_duration, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    if ( sch->io_disk_running ) draw_node( sch->io_disk_running, canvas, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT );
+    draw_rect( canvas, 1, RED, w, h*4-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_queue( sch->io_disk_queue, canvas, w, h*4-NODE_DRAW_HEIGHT );
+    
+    draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_counter( canvas, sch->io_tape_running ? sch->io_tape_running_time+1 : 0, sch->io_tape_duration, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    if ( sch->io_tape_running ) draw_node( sch->io_tape_running, canvas, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT );
+    draw_rect( canvas, 1, RED, w, h*5-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_queue( sch->io_tape_queue, canvas, w, h*5-NODE_DRAW_HEIGHT );
+    
+    draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_counter( canvas, sch->io_printer_running ? sch->io_printer_running_time+1 : 0, sch->io_printer_duration, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    if ( sch->io_printer_running ) draw_node( sch->io_printer_running, canvas, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT );
+    draw_rect( canvas, 1, RED, w, h*6-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
+    draw_queue( sch->io_printer_queue, canvas, w, h*6-NODE_DRAW_HEIGHT );
+}
 
 
 void print_scheduler( Scheduler* sch )

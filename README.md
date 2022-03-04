@@ -27,6 +27,11 @@ a estratégia de seleção *Round Robin (ou Circular)* com *Feedback*.
     Ferramenta para controlar a criação e limpeza dos arquivos executáveis usados neste projeto. Para Windows, o MinGW já possui o make e geralmente distribuições Linux já vem com a ferramenta instalada. Caso não possua a ferramenta, baixe do site oficial: https://www.gnu.org/software/make/;
 
 
+- ### SDL2:
+    O Simple DirectMedia Layer é utilizado neste projeto para gerenciar janelas e gráficos em baixo nível. As bibliotecas de desenvolvimento estão em https://www.libsdl.org/download-2.0.php.
+
+    Também utilizamos a extensão SDL2 TTF para mostrar texto na janela. A biblioteca está disponível em https://github.com/libsdl-org/SDL_ttf.
+    
 ## :computer: Executando o projeto:
 
 ### A partir do código fonte:
@@ -51,3 +56,8 @@ a estratégia de seleção *Round Robin (ou Circular)* com *Feedback*.
 
 - Caso não consiga executar algum comando ou não consiga abrir a janela do projeto, verifique se as dependências foram corretamente instaladas.
 - Caso tenha algum erro de execução, sinta-se à vontade para criar uma nova [**issue**](https://github.com/Gaizgrol/os-process-scheduling-sim/issues) no projeto.
+
+
+## :label: Créditos:
+
+- Fonte utilizada para visualização: https://www.fontspace.com/pixelletters-font-f22954
