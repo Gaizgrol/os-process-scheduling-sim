@@ -32,7 +32,6 @@ a estratégia de seleção *Round Robin (ou Circular)* com *Feedback*.
 
     Também utilizamos a extensão SDL2 TTF para mostrar texto na janela. A biblioteca está disponível em https://github.com/libsdl-org/SDL_ttf.
     
-
 ## :computer: Executando o projeto:
 
 ### A partir do código fonte:

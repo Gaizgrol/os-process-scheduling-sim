@@ -9,7 +9,7 @@ Process* new_process( const char* name )
 
     *p = (Process) {
         .pid = 0,
-        .ppid = 123456,
+        .ppid = 1, // Processo principal (simulador) invocou todos os outros
         .name = name,
 
         .state = READY,
