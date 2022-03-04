@@ -121,6 +121,7 @@ void clock_cpu( Scheduler* sch )
 
     // Espaço para execução será buscado somente no próximo ciclo
     sch->cpu_running = NULL;
+    sch->cpu_running_time = 0;
 }
 
 
@@ -138,29 +139,30 @@ void clock_disk( Scheduler* sch )
         sch->io_disk_running_time = 0;
         io_disk_fetch_next( sch );
         run( sch->io_disk_running->actual );
-        return;
+        // return;
     }
-    
-    // Tem alguém rodando!
-    // Aumenta o tempo de IO
-    sch->io_disk_running_time++;
 
-    if ( sch->io_disk_running_time < sch->io_disk_duration )
-        return;
-
-    Instruction i = fetch_next_instruction( running->actual );
-
-    if ( i != NOOP )
+    if ( sch->io_disk_running_time == sch->io_disk_duration )
     {
-        // Terminou o tempo de IO, volta para a fila de baixa prioridade
-        running->actual->priority = 0;
-        proc_enqueue( sch->cpu_low_priority_queue, running );
+        Instruction i = fetch_next_instruction( running->actual );
+
+        if ( i != NOOP )
+        {
+            // Terminou o tempo de IO, volta para a fila de baixa prioridade
+            running->actual->priority = 0;
+            proc_enqueue( sch->cpu_low_priority_queue, running );
+        }
+        else
+            running->actual->state = TERMINATED;
+
+        // Espaço para IO em disco fica aberto
+        sch->io_disk_running = NULL;
+        sch->io_disk_running_time = 0;
     }
     else
-        running->actual->state = TERMINATED;
-
-    // Espaço para IO em disco fica aberto
-    sch->io_disk_running = NULL;
+        // Tem alguém rodando!
+        // Aumenta o tempo de IO
+        sch->io_disk_running_time++;
 }
 
 
@@ -180,27 +182,28 @@ void clock_tape( Scheduler* sch )
         run( sch->io_tape_running->actual );
         return;
     }
-    
-    // Tem alguém rodando!
-    // Aumenta o tempo de IO
-    sch->io_tape_running_time++;
 
-    if ( sch->io_tape_running_time < sch->io_tape_duration )
-        return;
-
-    Instruction i = fetch_next_instruction( running->actual );
-
-    if ( i != NOOP )
+    if ( sch->io_tape_running_time == sch->io_tape_duration )
     {
-        // Terminou o tempo de IO, volta para a fila de alta prioridade
-        running->actual->priority = 1;
-        proc_enqueue( sch->cpu_high_priority_queue, running );
+        Instruction i = fetch_next_instruction( running->actual );
+
+        if ( i != NOOP )
+        {
+            // Terminou o tempo de IO, volta para a fila de alta prioridade
+            running->actual->priority = 1;
+            proc_enqueue( sch->cpu_high_priority_queue, running );
+        }
+        else
+            running->actual->state = TERMINATED;
+
+        // Espaço para IO em fita fica aberto
+        sch->io_tape_running = NULL;
+        sch->io_tape_running_time = 0;
     }
     else
-        running->actual->state = TERMINATED;
-
-    // Espaço para IO em fita fica aberto
-    sch->io_tape_running = NULL;
+        // Tem alguém rodando!
+        // Aumenta o tempo de IO
+        sch->io_tape_running_time++;
 }
 
 
@@ -220,27 +223,28 @@ void clock_printer( Scheduler* sch )
         run( sch->io_printer_running->actual );
         return;
     }
-    
-    // Tem alguém rodando!
-    // Aumenta o tempo de IO
-    sch->io_printer_running_time++;
 
     if ( sch->io_printer_running_time < sch->io_printer_duration )
-        return;
-
-    Instruction i = fetch_next_instruction( running->actual );
-
-    if ( i != NOOP )
     {
-        // Terminou o tempo de IO, volta para a fila de alta prioridade
-        running->actual->priority = 1;
-        proc_enqueue( sch->cpu_high_priority_queue, running );
+        Instruction i = fetch_next_instruction( running->actual );
+
+        if ( i != NOOP )
+        {
+            // Terminou o tempo de IO, volta para a fila de alta prioridade
+            running->actual->priority = 1;
+            proc_enqueue( sch->cpu_high_priority_queue, running );
+        }
+        else
+            running->actual->state = TERMINATED;
+
+        // Espaço para IO em fita fica aberto
+        sch->io_printer_running = NULL;
+        sch->io_printer_running_time = 0;
     }
     else
-        running->actual->state = TERMINATED;
-
-    // Espaço para IO em fita fica aberto
-    sch->io_printer_running = NULL;
+        // Tem alguém rodando!
+        // Aumenta o tempo de IO
+        sch->io_printer_running_time++;
 }
 
 
@@ -325,26 +329,26 @@ void draw_scheduler( Scheduler* sch, UI* canvas )
     // CPU bound
     draw_rect( canvas, 1, CYAN, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
     if ( sch->cpu_running ) draw_node( sch->cpu_running, canvas, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT );
-    draw_counter( canvas, sch->cpu_running ? sch->cpu_running_time : 0, sch->cpu_max_time_slice, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    draw_counter( canvas, sch->cpu_running_time, sch->cpu_max_time_slice, PROCESS_DRAW_WIDTH+margin, h-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     draw_rect( canvas, 1, BLUE, w, h-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->cpu_high_priority_queue, canvas, w, h-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, BLUE, w, h*2-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->cpu_low_priority_queue, canvas, w, h*2-NODE_DRAW_HEIGHT );
     // IO bound
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
-    draw_counter( canvas, sch->io_disk_running ? sch->io_disk_running_time+1 : 0, sch->io_disk_duration, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    draw_counter( canvas, sch->io_disk_running_time, sch->io_disk_duration, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_disk_running ) draw_node( sch->io_disk_running, canvas, PROCESS_DRAW_WIDTH+margin, h*4-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*4-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_disk_queue, canvas, w, h*4-NODE_DRAW_HEIGHT );
     
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
-    draw_counter( canvas, sch->io_tape_running ? sch->io_tape_running_time+1 : 0, sch->io_tape_duration, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    draw_counter( canvas, sch->io_tape_running_time, sch->io_tape_duration, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_tape_running ) draw_node( sch->io_tape_running, canvas, PROCESS_DRAW_WIDTH+margin, h*5-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*5-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_tape_queue, canvas, w, h*5-NODE_DRAW_HEIGHT );
     
     draw_rect( canvas, 1, MAGENTA, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT, NODE_DRAW_WIDTH, NODE_DRAW_HEIGHT );
-    draw_counter( canvas, sch->io_printer_running ? sch->io_printer_running_time+1 : 0, sch->io_printer_duration, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
+    draw_counter( canvas, sch->io_printer_running_time, sch->io_printer_duration, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT-COUNTER_HEIGHT );
     if ( sch->io_printer_running ) draw_node( sch->io_printer_running, canvas, PROCESS_DRAW_WIDTH+margin, h*6-NODE_DRAW_HEIGHT );
     draw_rect( canvas, 1, RED, w, h*6-NODE_DRAW_HEIGHT, WINDOW_WIDTH, NODE_DRAW_HEIGHT );
     draw_queue( sch->io_printer_queue, canvas, w, h*6-NODE_DRAW_HEIGHT );
